@@ -15,18 +15,28 @@ export const mainRouter = [
 export const adminRouter = [
     {
         pathname: '/admin/dashboard',
-        component: Dashboard
-    },
-    {
-        pathname: '/admin/settings',
-        component: Settings
+        component: Dashboard,
+        title: 'Dashboard',
+        isNav: true,
+        icon: 'dashboard'
     },
     {
         pathname: '/admin/article',
-        component: ArticleList
+        component: ArticleList,
+        title: 'Articles',
+        isNav: true,
+        exact: true,
+        icon: 'unordered-list'
     },
     {
         pathname: '/admin/article/edit/:id',
         component: ArticleEdit
+    },
+    {
+        pathname: '/admin/settings',
+        component: Settings,
+        title: 'Setting',
+        isNav: true,
+        icon: 'setting'
     }
 ]

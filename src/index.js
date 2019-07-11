@@ -3,7 +3,7 @@ import { render } from 'react-dom'
 import App from './App'
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 import { mainRouter } from './routes'
-
+import './index.less'
 import { domainToASCII } from 'url';
 
 render(
