@@ -3,7 +3,7 @@ import { Layout, Menu, Icon } from 'antd'
 import { withRouter } from 'react-router-dom'
 import logo from './logo.png'
 import './frame.less'
-const { SubMenu } = Menu
+// const { SubMenu } = Menu
 const { Header, Content, Sider } = Layout
 
 @withRouter
