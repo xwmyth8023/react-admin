@@ -15,7 +15,7 @@ service.interceptors.request.use((config) => {
 })
 
 service.interceptors.response.use((response)=>{
-  if (response.data.code == 200) {
+  if (response.data.code === 200) {
     return response.data.data
   } else {
     //catch error
