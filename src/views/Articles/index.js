@@ -1,64 +1,66 @@
 import React, { Component } from 'react'
-import { Card,Button,Table } from 'antd'
+import { Card, Button, Table, Tag } from 'antd'
 import { getArticles } from '../../requests'
+import moment from 'moment'
+import ButtonGroup from 'antd/lib/button/button-group';
 
 export default class ArticleList extends Component {
     constructor(){
       super()
       this.state = {
-        dataSource: [
-          {
-            key: '1',
-            name: '胡彦斌',
-            age: 32,
-            address: '西湖区湖底公园1号',
-          },
-          {
-            key: '2',
-            name: '胡彦祖',
-            age: 42,
-            address: '西湖区湖底公园1号',
-          },
-        ],
-        columns: [
-          {
-            title: '姓名',
-            dataIndex: 'name',
-            key: 'name',
-          },
-          {
-            title: '年龄',
-            dataIndex: 'age',
-            key: 'age',
-          },
-          {
-            title: '住址',
-            dataIndex: 'address',
-            key: 'address',
-          },
-          {
-            title: '操作',
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (text,record) => {
-              return <Button>编辑</Button>
-            }
-          }
-        ],
-        total: 0
-        
+        dataSource: [],
+        columns: [],
+        total: 0,
+        isLoading:false
       }
     }
     createCloumns = (columnsKeys) => {
-      return columnsKeys.map(item => {
+      const columns = columnsKeys.map(item => {
+        if(item ==='amount'){
+          return {
+            title: item,
+            key: item,
+            render: (text,record)=>{
+              const { amount } = record
+              return <Tag color={amount > 200 ? 'green' : 'red'}>{amount}</Tag>
+            }
+          }
+        }
+        if(item === 'createAt'){
+          return {
+            title:  item,
+            key: item,
+            render:(text,record)=>{
+              const { createAt } = record
+              return moment(createAt).format()
+            }
+
+          }
+        }
         return {
           title: item,
           dataIndex: item,
           key: item
         }
       })
+      columns.push({
+        title:'action',
+        key:'action',
+        render(){
+          return (
+            <ButtonGroup>
+              <Button size='small' type='primary' >编辑</Button>
+              <Button size='small' type='danger' >删除</Button>
+            </ButtonGroup>
+          )
+        }
+      })
+      return columns
     }
     getDate = () => {
+      this.setState({
+        isLoading:true
+      })
       getArticles()
         .then(resp => {
           const columnsKeys = Object.keys(resp.list[0])
@@ -67,6 +69,14 @@ export default class ArticleList extends Component {
             total: resp.total,
             dataSource: resp.list,
             columns
+          })
+        })
+        .catch(error => {
+          //
+        })
+        .finally(()=>{
+          this.setState({
+            isLoading:false
           })
         })
     }
@@ -82,6 +92,8 @@ export default class ArticleList extends Component {
                   extra={<Button>export excel</Button>}
                 >
                   <Table 
+                    loading={this.state.isLoading}
+                    rowKey={record => record.id}
                     columns={this.state.columns} 
                     dataSource={this.state.dataSource} 
                     pagination={{
