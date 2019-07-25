@@ -11,9 +11,12 @@ export default class ArticleList extends Component {
         dataSource: [],
         columns: [],
         total: 0,
-        isLoading:false
+        isLoading: false,
+        limited: 10,
+        offset: 0
       }
     }
+
     createCloumns = (columnsKeys) => {
       const columns = columnsKeys.map(item => {
         if(item ==='amount'){
@@ -57,11 +60,12 @@ export default class ArticleList extends Component {
       })
       return columns
     }
-    getDate = () => {
+
+    getData = () => {
       this.setState({
         isLoading:true
       })
-      getArticles()
+      getArticles(this.state.offset,this.state.limited)
         .then(resp => {
           const columnsKeys = Object.keys(resp.list[0])
           const columns = this.createCloumns(columnsKeys)
@@ -80,9 +84,32 @@ export default class ArticleList extends Component {
           })
         })
     }
-    componentDidMount(){
-      this.getDate()
+
+    onPageChange = (page,pageSize) => {
+      console.log('page:',page,'pageSize:',pageSize,'total:',page*pageSize)
+      this.setState({
+        offset: (page-1)*pageSize,
+        limited: pageSize
+
+      },()=>{
+        this.getData()
+      })
     }
+
+    onShowSizeChange = (current,size) => {
+      this.setState({
+        offset: 0,
+        limited: size
+
+      },()=>{
+        this.getData()
+      })
+    }
+
+    componentDidMount(){
+      this.getData()
+    }
+
     render() {
         return (
             <div>
@@ -97,8 +124,14 @@ export default class ArticleList extends Component {
                     columns={this.state.columns} 
                     dataSource={this.state.dataSource} 
                     pagination={{
+                      current:this.state.offset / this.state.limited + 1,
                       total:this.state.total,
-                      hideOnSinglePage: true
+                      hideOnSinglePage: true,
+                      showQuickJumper: true,
+                      showSizeChanger:true,
+                      onChange:this.onPageChange,
+                      onShowSizeChange:this.onShowSizeChange,
+                      pageSizeOptions:['10','15','20','25']
                     }} 
                     />
                 </Card>
