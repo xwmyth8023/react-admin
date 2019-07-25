@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { Card, Button, Table, Tag } from 'antd'
-import { getArticles } from '../../requests'
+import XLSX from 'xlsx'
 import moment from 'moment'
+import { getArticles } from '../../requests'
 import ButtonGroup from 'antd/lib/button/button-group';
 
 export default class ArticleList extends Component {
@@ -106,6 +107,27 @@ export default class ArticleList extends Component {
       })
     }
 
+    toExcel = () => {
+      const data = [Object.keys(this.state.dataSource[0])]
+
+      for (let i=0;i<this.state.dataSource.length;i++) {
+        data.push([
+          this.state.dataSource[i].id,
+          this.state.dataSource[i].title,
+          this.state.dataSource[i].author,
+          this.state.dataSource[i].amount,
+          moment(this.state.dataSource[i].createAt).format()
+        ])
+      }
+
+      // console.log('export data to excel')
+      const ws = XLSX.utils.aoa_to_sheet(data);
+		  const wb = XLSX.utils.book_new();
+		  XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
+		  /* generate XLSX file and send to client */
+		  XLSX.writeFile(wb, `articles-${this.state.offset / this.state.limited + 1}-${moment().format()}.xlsx`)
+    }
+
     componentDidMount(){
       this.getData()
     }
@@ -116,7 +138,7 @@ export default class ArticleList extends Component {
                 <Card 
                   title="Articles List" 
                   bordered={false} 
-                  extra={<Button>export excel</Button>}
+                  extra={ <Button onClick={this.toExcel} >export excel</Button> }
                 >
                   <Table 
                     loading={this.state.isLoading}
