@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Card, Button, Table, Tag, Modal } from 'antd'
+import { Card, Button, Table, Tag, Modal, Typography, message } from 'antd'
 import XLSX from 'xlsx'
 import moment from 'moment'
 import { getArticles, deleteArticle } from '../../requests'
@@ -14,7 +14,11 @@ export default class ArticleList extends Component {
         total: 0,
         isLoading: false,
         limited: 10,
-        offset: 0
+        offset: 0,
+        deleteArticleTitle: '',
+        isShowArticleModal: null,
+        deleteArticleConfirmLoading: false,
+        deleteArticleID: null
       }
     }
 
@@ -54,7 +58,7 @@ export default class ArticleList extends Component {
           return (
             <ButtonGroup>
               <Button size='small' type='primary' >编辑</Button>
-              <Button size='small' type='danger' onClick={this.deleteArticles.bind(this,record)} >删除</Button>
+              <Button size='small' type='danger' onClick={this.showDeleteArticleModal.bind(this,record)} >删除</Button>
             </ButtonGroup>
           )
         }
@@ -62,17 +66,53 @@ export default class ArticleList extends Component {
       return columns
     }
 
-    deleteArticles=(record)=>{
-      console.log(record)
-      Modal.confirm({
-        title: `确认删除${record.id}吗？`,
-        content: '该操作不可逆，请谨慎！！!',
-        onOk:()=>{
-          deleteArticle(record.id)
-            .then(resp => {
-              console.log(resp)
-            })
-        }
+    deleteArticleByID = () => {
+      // console.log(this.state.deleteArticleID)
+      this.setState({
+        deleteArticleConfirmLoading: true
+      })
+      deleteArticle(this.state.deleteArticleID)
+        .then(resp => {
+          // console.log(resp)
+          message.success(resp.msg)
+          this.setState({
+            offset:0
+          },()=>{
+            this.getData()
+          })
+        })
+        .finally(()=>{
+          this.setState({
+            deleteArticleConfirmLoading: false,
+            isShowArticleModal: false
+          })
+        })
+    }
+
+    showDeleteArticleModal = (record) =>{
+      // console.log(record)
+      // Modal.confirm({
+      //   title: `确认删除${record.id}吗？`,
+      //   content: '该操作不可逆，请谨慎！！!',
+      //   onOk:()=>{
+      //     deleteArticle(record.id)
+      //       .then(resp => {
+      //         console.log(resp)
+      //       })
+      //   }
+      // })
+      this.setState({
+        isShowArticleModal: true,
+        deleteArticleTitle: record.title,
+        deleteArticleID: record.id
+      })
+    }
+
+    hideDeleteModal = () => {
+      this.setState({
+        isShowArticleModal: false,
+        deleteArticleTitle: '',
+        deleteArticleConfirmLoading: false
       })
     }
 
@@ -171,6 +211,16 @@ export default class ArticleList extends Component {
                     }} 
                     />
                 </Card>
+                <Modal
+                  title='此操作不可逆'
+                  visible={this.state.isShowArticleModal}
+                  onCancel={this.hideDeleteModal}
+                  confirmLoading={this.state.deleteArticleConfirmLoading}
+                  maskClosable={false}
+                  onOk={this.deleteArticleByID}
+                >
+                  <Typography>确定要删除<span>{this.state.deleteArticleTitle}</span>吗？</Typography>
+                </Modal>
             </div>
         )
     }
