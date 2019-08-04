@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Card, Button, Table, Tag } from 'antd'
+import { Card, Button, Table, Tag, Modal } from 'antd'
 import XLSX from 'xlsx'
 import moment from 'moment'
-import { getArticles } from '../../requests'
+import { getArticles, deleteArticle } from '../../requests'
 import ButtonGroup from 'antd/lib/button/button-group';
 
 export default class ArticleList extends Component {
@@ -50,16 +50,30 @@ export default class ArticleList extends Component {
       columns.push({
         title:'action',
         key:'action',
-        render(){
+        render:(text,record)=>{
           return (
             <ButtonGroup>
               <Button size='small' type='primary' >编辑</Button>
-              <Button size='small' type='danger' >删除</Button>
+              <Button size='small' type='danger' onClick={this.deleteArticles.bind(this,record)} >删除</Button>
             </ButtonGroup>
           )
         }
       })
       return columns
+    }
+
+    deleteArticles=(record)=>{
+      console.log(record)
+      Modal.confirm({
+        title: `确认删除${record.id}吗？`,
+        content: '该操作不可逆，请谨慎！！!',
+        onOk:()=>{
+          deleteArticle(record.id)
+            .then(resp => {
+              console.log(resp)
+            })
+        }
+      })
     }
 
     getData = () => {
@@ -87,7 +101,7 @@ export default class ArticleList extends Component {
     }
 
     onPageChange = (page,pageSize) => {
-      console.log('page:',page,'pageSize:',pageSize,'total:',page*pageSize)
+      // console.log('page:',page,'pageSize:',pageSize,'total:',page*pageSize)
       this.setState({
         offset: (page-1)*pageSize,
         limited: pageSize
