@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Card, Button, Table, Tag, Modal, Typography, message } from 'antd'
+import { Card, Button, Table, Tag, Modal, Typography, message, Tooltip } from 'antd'
 import XLSX from 'xlsx'
 import moment from 'moment'
 import { getArticles, deleteArticle } from '../../requests'
@@ -22,6 +22,10 @@ export default class ArticleList extends Component {
       }
     }
 
+    toEdit = (id) => {
+      this.props.history.push(`/admin/article/edit/${id}`)
+    }
+
     createCloumns = (columnsKeys) => {
       const columns = columnsKeys.map(item => {
         if(item ==='amount'){
@@ -30,7 +34,7 @@ export default class ArticleList extends Component {
             key: item,
             render: (text,record)=>{
               const { amount } = record
-              return <Tag color={amount > 200 ? 'green' : 'red'}>{amount}</Tag>
+              return <Tooltip title={amount > 200 ? 'more than 200' : 'less than 200'} ><Tag color={amount > 200 ? 'green' : 'red'}>{amount}</Tag></Tooltip>      
             }
           }
         }
@@ -57,7 +61,7 @@ export default class ArticleList extends Component {
         render:(text,record)=>{
           return (
             <ButtonGroup>
-              <Button size='small' type='primary' >编辑</Button>
+              <Button size='small' type='primary' onClick={this.toEdit.bind(this,record.id)} >编辑</Button>
               <Button size='small' type='danger' onClick={this.showDeleteArticleModal.bind(this,record)} >删除</Button>
             </ButtonGroup>
           )
